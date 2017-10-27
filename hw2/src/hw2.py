@@ -136,6 +136,7 @@ def train_logistic(X_all, Y_all, X_test, batch_size, epoch, validation, save_pat
 	w = np.zeros((X_train.shape[1],)) + 1e-3
 	b = np.zeros((1,))
 	eta = 0.001
+	# lamda = 0.01
 	m = 0
 	v = 0
 	mb = 0
@@ -145,16 +146,16 @@ def train_logistic(X_all, Y_all, X_test, batch_size, epoch, validation, save_pat
 	bm_p = 1
 	bv_p = 1
 	epsilon = 1e-8
+	# acc_max_params = {'max': 0, 'pos': 0, 'w': w, 'b': b}
+	# early_stopping_rounds = 300
 
-	acc_train = []
-	acc_test = []
-	
 	if batch_size == 0:
 		batch_size = X_train.shape[0]
 	step_num = int(X_train.shape[0] / batch_size)
 	
 	for e in range(1, epoch + 1):
 		X_train, Y_train = shuffle_data(X_train, Y_train)
+		total_loss = 0.0
 
 		for step in range(step_num):
 			X = X_train[step*batch_size:(step+1)*batch_size]
@@ -162,6 +163,8 @@ def train_logistic(X_all, Y_all, X_test, batch_size, epoch, validation, save_pat
 
 			z = np.dot(w, X.T) + b
 			f = sigmoid(z)
+
+			total_loss += -(np.dot(np.squeeze(Y), np.log(f)) + np.dot(1 - np.squeeze(Y), np.log(1 - f)))
 
 			w_grad = -1.0 * np.dot(np.squeeze(Y) - f, X)
 			m = bm * m + (1 - bm) * w_grad
@@ -180,8 +183,24 @@ def train_logistic(X_all, Y_all, X_test, batch_size, epoch, validation, save_pat
 			b = b - eta * mb_ / (vb_ ** 0.5 + epsilon)
 
 		if e % 100 == 0:
-			print('epoch %04d: train acc = %.10f' % (e, acc_logistic(X_train, Y_train, w, b)))
-
+			print('epoch %04d: train acc = %.10f loss = %.10f' % (e, acc_logistic(X_train, Y_train, w, b), total_loss))
+		"""
+		if validation:
+			valid_acc = acc_logistic(X_valid, Y_valid, w, b)
+			if valid_acc > acc_max_params['max']:
+				acc_max_params['max'] = valid_acc
+				acc_max_params['pos'] = e
+				acc_max_params['w'] = w
+				acc_max_params['b'] = b
+			elif e - acc_max_params['pos'] > early_stopping_rounds:
+				print('Early Stopping at epoch %d' % (e))
+				print('Acc_max = %.10f at epoch %d' % (acc_max_params['max'], acc_max_params['pos']))
+				w = acc_max_params['w']
+				b = acc_max_params['b']
+				break
+			else:
+				pass
+		"""
 	train_acc = acc_logistic(X_train, Y_train, w, b)
 	if validation:
 		valid_acc = acc_logistic(X_valid, Y_valid, w, b)
@@ -209,7 +228,7 @@ def infer_logistic(X_test, save_path, output_path):
 			f.write('%d,%d\n' % (i+1, result[i]))
 
 def main(args):
-	#np.random.seed(1126)
+	# np.random.seed(1126)
 
 	X_all, Y_all, X_test = load_data(args.train_data_path, args.train_label_path, args.test_data_path)
 	X_all, X_test = normalize(X_all, X_test)
@@ -241,7 +260,7 @@ if __name__ == '__main__':
 	parser.add_argument('--train-label-path', type=str, default='./data/Y_train.dms', dest='train_label_path', help='Path to training data\'s label')
 	parser.add_argument('--test-data-path', type=str, default='./data/X_test.dms', dest='test_data_path', help='Path to testing data')
 	parser.add_argument('--save-path', type=str, default='./params', dest='save_path', help='Path to saving parameters')
-	parser.add_argument('--output-path', type=str, default='./out/prediction', dest='output_path', help='Path to outputing prediction')
+	parser.add_argument('--output-path', type=str, default='./out/prediction.csv', dest='output_path', help='Path to outputing prediction')
 	parser.add_argument('--batch-size', type=int, default=32, dest='batch_size', help='Specify the batch size')
 	parser.add_argument('--epoch', type=int, default=1000, dest='epoch', help='Specify the number of epoch')
 	args = parser.parse_args()
