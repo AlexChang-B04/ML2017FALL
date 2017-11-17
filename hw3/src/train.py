@@ -35,7 +35,7 @@ def split_valid_set(X_all, Y_all, percentage):
 	return (X_all[split_pos:], Y_all[split_pos:], X_all[0:split_pos], Y_all[0:split_pos])
 
 def train(X_all, Y_all, batch_size, epoch):
-	X_train, Y_train, X_valid, Y_valid = split_valid_set(X_all, Y_all, 0.1)
+	X_train, Y_train, X_valid, Y_valid = split_valid_set(X_all, Y_all, 0.2)
 
 	model = Sequential()
 	model.add( Conv2D( filters=64, kernel_size=(5,5), padding='same', activation='selu', kernel_initializer='glorot_normal', input_shape=(48,48,1) ) )
@@ -109,7 +109,7 @@ def train(X_all, Y_all, batch_size, epoch):
 						callbacks=callbacks,
 						validation_data=(X_valid, Y_valid))
 
-	model.save_model(args.save_path)
+	model.save(args.save_path)
 
 def main(args):
 	X_all, Y_all = load_data(args.train_data_path)
