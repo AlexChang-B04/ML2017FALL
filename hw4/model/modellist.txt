@@ -1,0 +1,6 @@
+word2vec_rnn
+word2vec_bi_rnn
+word2vec_double_rnn
+word2vec_double_rnn_semi
+word2vec_double_rnn256
+word2vec_double_rnn256_semi
