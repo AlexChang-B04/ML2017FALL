@@ -14,10 +14,10 @@
 Only prediction:
 ```sh
 cd src/
-bash python3 final_reproduce.sh <training_data folder> <testing_data path> <prediction_file path>
+bash final_reproduce.sh <training_data folder> <testing_data path> <prediction_file path>
 ```
 Including preprocessing, word2vec training, prediction:
 ```sh
 cd src/
-bash python3 final.sh <training_data folder> <testing_data path> <prediction file path>
+bash final.sh <training_data folder> <testing_data path> <prediction file path>
 ```
